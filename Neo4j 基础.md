@@ -576,7 +576,79 @@ DETACH DELETE n;
 
 ****
 
+`Neo4j` 中同样支持索引，创建索引，以提高在大型数据集上对节点和关系进行查找和匹配的速度。
 
+`Neo4j` 索引的底层实现原理主要依赖于两个核心组件：标签扫描器（Label Scanner）和属性索引（Property Index）：
 
+- 标签扫描器（Label Scanner）：
+    - 使用标签扫描器来快速定位具有特定标签的节点。
+    - 标签扫描器维护了一个映射表，其中的每个条目都包含一个标签和指向具有该标签的节点的指针列表。当执行针对特定标签的查询时，标签扫描器可以快速定位到相关节点的位置。
+    - 标签扫描器允许在节点创建和删除时进行高效的更新，以保持索引的实时性。
+- 属性索引（Property Index）：
+    - 属性索引是基于节点和关系属性的值构建的数据结构，用于快速查找具有特定属性值的节点或关系。
+    - 使用 `B+` 树作为属性索引的底层数据结构。树中的每个节点都包含多个键值对，其中键是属性的值，值是指向具有该属性值的节点或关系的指针。
+    - 在执行带有属性条件的查询时，属性索引可以通过在 `B+` 树上进行范围搜索或精确查找来快速定位到满足条件的节点或关系。
 
+此外，`Neo4j` 还提供了全文索引（Full-Text Index）和空间索引（Spatial Index）等特定类型的索引，用于支持全文搜索和地理空间查询。这些特定类型的索引也有其特定的底层实现，这里不再做深究。
 
+****
+
+### 创建索引
+
+****
+
+对节点属性创建索引：
+```cypher
+CREATE INDEX ON :Label(property)
+```
+这将在具有特定标签（Label）的节点上创建一个属性（property）的索引。
+
+对关系属性创建索引：
+```cypher
+CREATE INDEX ON :RELATIONSHIP_TYPE(property)
+```
+这将在具有特定关系类型（RELATIONSHIP_TYPE）的关系上创建一个属性（property）的索引。
+
+****
+
+### 索引查询
+
+****
+
+对节点属性使用索引：
+```cypher
+MATCH (n:Label)
+WHERE n.property = value
+RETURN n
+```
+这将使用节点属性的索引来查找具有特定属性值的节点。
+
+对关系属性使用索引：
+```cypher
+MATCH ()-[r:RELATIONSHIP_TYPE]-()
+WHERE r.property = value
+RETURN r
+```
+这将使用关系属性的索引来查找具有特定属性值的关系。
+
+****
+
+### 删除索引
+
+****
+
+使用 `DROP INDEX` 删除索引，例如：
+
+```
+DROP INDEX ON :Label(property)
+```
+这将删除特定标签（Label）上的属性（property）索引。
+
+****
+
+# 官方文档参考
+
+****
+
+- [Neo4j 4.4 安装](https://neo4j.com/docs/operations-manual/4.4/installation/)
+- [Cypher Manual 4.4](https://neo4j.com/docs/cypher-manual/4.4/introduction/)
