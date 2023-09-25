@@ -297,7 +297,7 @@ RETURN n.name AS LYS_NAME;
 首先我们导入一些数据用于后面的示例：
 
 ```cypher
-CREATE(n:DOG {name: "LYS", age: "14"}) -[:LOVER]-> (:BIRD {name: "Astesia", age: "13"}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: "17"}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: "114"}), (c) -[:FAN_OF]-> (m), (p:PLANTFROM {name: "BILIBILI"}), (p) -[:BELONGS_to]-> (c);
+CREATE(n:DOG {name: "LYS", age: "14"}) -[:LOVER]-> (:BIRD {name: "Astesia", age: "13"}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: "17"}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: "114"}) -[:LOVER]-> (:DOG {name: "LexBurner", age: "514"}), (c) -[:FAN_OF]-> (m), (n) -[:WORK_FOR]-> (p:PLANTFROM {name: "BILIBILI"}) -[:HAVE]-> (:DOG {name: "UPs", age: "ULT"}), (p) -[:BELONGS_to]-> (c);
 CREATE(:WORKER:DOG {name: "打工人", age: "60"}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: "20"});
 ```
 
@@ -370,11 +370,53 @@ RETURN type(r);
 
 ****
 
+> 六度分隔（Six Degrees of Separation）理论。
+>
+> 1967年，哈佛大学的心理学教授Stanley Milgram（1933~1984）想要描绘一个连结人与社区的人际连系网。做过一次连锁信实验，结果发现了“六度分隔”现象。简单地说：“你和任何一个陌生人之间所间隔的人不会超过六个，也就是说，最多通过六个人你就能够认识任何一个陌生人。”
 
+由于一个节点可能存在多个关系，如果想要查询一条关系路径，未免包含太多的可行路径，因此需要在指定的深度内进行查询，这个查询的过程类似于迭代加深搜索的过程。
 
+在图数据库中进行关系深度查询时，可以使用 `*` 运算符来指定关系的深度。以下是关系深度查询的语法：
 
+```cypher
+MATCH (startNode)-[*<minDepth>..<maxDepth>]-(endNode)
+RETURN startNode, endNode;
+```
 
+其中：
+- `(startNode)` 和 `(endNode)` 是节点模式，用于指定起始节点和结束节点。
+- `[*<minDepth>..<maxDepth>]` 是关系模式，用于指定关系的深度范围。`<minDepth>` 表示最小深度，`<maxDepth>` 表示最大深度。可以根据需要省略其中一个值，或者两个值都省略。
+  - 如果只指定 `<minDepth>`，则表示最小深度为该值，而没有最大深度限制。
+  - 如果只指定 `<maxDepth>`，则表示最大深度为该值，而没有最小深度限制。
+  - 如果同时指定 `<minDepth>` 和 `<maxDepth>`，则表示深度范围在最小深度和最大深度之间（包括最小深度和最大深度）。
 
+例如，查询从某个节点出发，关系深度为 $1 \sim 2$ 的节点：
+
+```cypher
+MATCH (n:CAT {name:"Hiiro"}) -[*1..2]->(m) RETURN *;
+```
+
+也可以写成：
+
+```cypher
+MATCH (n:CAT {name:"Hiiro"}) -[*..2]->(m) RETURN *;
+```
+
+查询两个节点之间的所有路径，指定深度最大为 $4$ ：
+
+```cypher
+MATCH path = (n:DOG) -[*..4]->(m:MOUSE)
+WHERE n.name = "LYS" AND m.name = "ChenRay"
+RETURN path;
+```
+
+查询两个节点之间的最短路径，指定深度最大为 $6$ ：
+
+```cypher
+MATCH path = shortestPath((n:DOG) -[*..6]->(m:MOUSE))
+WHERE n.name = "LYS" AND m.name = "ChenRay"
+RETURN path;
+```
 
 ****
 
