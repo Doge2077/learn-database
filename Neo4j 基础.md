@@ -212,13 +212,13 @@ CREATE (n:ANIMAL:DOG);
 添加属性：
 
 ```cypher
-CREATE (n:DOG {name: "LYS", age: "14"});
+CREATE (n:DOG {name: "LYS", age: 14});
 ```
 
 创建多个节点：
 
 ```cypher
-CREATE (n:DOG {name: "LYS", age: "14"}), (m:CAT {name: "Hiiro", age: "17"});
+CREATE (n:DOG {name: "LYS", age: 14}), (m:CAT {name: "Hiiro", age: 17});
 ```
 
 `n` 和 `m` 只是节点的变量名，在同一条创建语句中节点的变量名不能相同，节点的变量名不会影响后续的查询。
@@ -226,7 +226,7 @@ CREATE (n:DOG {name: "LYS", age: "14"}), (m:CAT {name: "Hiiro", age: "17"});
 当然也可以不加变量名：
 
 ```cypher
-CREATE (:DOG {name: "LYS", age: "14"}), (:CAT {name: "Hiiro", age: "17"});
+CREATE (:DOG {name: "LYS", age: 14}), (:CAT {name: "Hiiro", age: 17});
 ```
 
 ****
@@ -299,8 +299,9 @@ RETURN n.name AS LYS_NAME;
 首先我们导入一些数据用于后面的示例：
 
 ```cypher
+MATCH(n) DETACH DELETE n;
 CREATE(n:DOG {name: "LYS", age: 14}) -[:LOVER]-> (:BIRD {name: "Astesia", age: 13}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: 17}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: 114}) -[:LOVER]-> (:DOG {name: "LexBurner", age: 514}), (c) -[:FAN_OF]-> (m), (n) -[:WORK_FOR]-> (p:PLANTFROM {name: "BILIBILI"}) -[:HAVE]-> (:DOG {name: "UPs", age: 1919}), (p) -[:BELONGS_to]-> (c);
-CREATE(:WORKER:DOG {name: "打工人", age: 60}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: 20});
+CREATE(:WORKER:DOG {name: "打工人", age: 60}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: 20}), (:DOG {name: "黑心老板", age: 0}), (:DOG {name: "黑心老板", age: 1}), (:DOG {name: "伤心打工人", age: 520}), (:DOG {name: "快乐打工人", age: 520}) -[:WORK_FOR]-> (:DOG {name: "良心老板", age: 1314});
 ```
 
 ****
@@ -533,25 +534,47 @@ RETURN n;
 
 ****
 
-删除某个节点：
+删除节点：
 
+```cypher
+MATCH(n)
+WHERE n.name = "伤心打工人" OR n.name = "黑心老板"
+DELETE n;
+```
 
+```cypher
+MATCH(n)
+WHERE n.name = "打工人"
+DELETE n;
+```
 
+如果删除的节点具有关系，则无法删除，需要先删除对应关系后才能删除节点：
 
+```cypher
+MATCH(n) -[r:WORK_FOR]-> (m)
+WHERE n.name = "打工人"
+DELETE r, m;
+```
 
+或者添加 `DETACH` 强制删除该节点及其对应关系：
 
+```cypher
+MATCH (n:DOG {name: "快乐打工人"}) 
+DETACH DELETE n;
+```
 
+删除所有节点及其关系：
 
-
-
+```cypher
+MATCH(n)
+DETACH DELETE n;
+```
 
 ****
 
 ## 索引
 
 ****
-
-
 
 
 
