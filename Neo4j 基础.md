@@ -273,17 +273,11 @@ CREATE (n:DOG {name: "LYS"}) -[:IN_FAN] -> (i:CAT {name: "Hiiro"}) -[:WORK_FOR]-
 CREATE (n:DOG {name: "LYS", age: "14"}) RETURN n;
 ```
 
-执行后直接返回了结果：
-
-![image-20230925094006836](https://image.itbaima.net/images/40/image-20230925099619410.png)
-
 也可以返回我们创建好的关系：
 
 ```cypher
 CREATE (n:DOG {name: "LYS", age: "14"}) -[:IN_FAN]-> (m:CAT {name: "Hiiro", age: "17"}) RETURN n, m;
 ```
-
-![image-20230925094116510](https://image.itbaima.net/images/40/image-20230925097821415.png)
 
 也可以给返回的结果取别名：
 
@@ -292,7 +286,7 @@ CREATE (n:DOG {name: "LYS", age: "14"})
 RETURN n.name AS LYS_NAME;
 ```
 
-![image-20230925094342285](https://image.itbaima.net/images/40/image-2023092509889864.png)
+更多关于 `RETURN` 的用法将在下文陆续提到。
 
 ****
 
@@ -300,17 +294,75 @@ RETURN n.name AS LYS_NAME;
 
 ****
 
+首先我们导入一些数据用于后面的示例：
+
+```cypher
+CREATE(n:DOG {name: "LYS", age: "14"}) -[:LOVER]-> (:BIRD {name: "Astesia", age: "13"}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: "17"}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: "114"}), (c) -[:FAN_OF]-> (m), (p:PLANTFROM {name: "BILIBILI"}), (p) -[:BELONGS_to]-> (c);
+CREATE(:WORKER:DOG {name: "打工人", age: "60"}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: "20"});
+```
+
+****
+
 ### 条件查询
 
 ****
 
+查询所有的节点及其关系：
 
+```cypher
+MATCH(n) 
+RETURN n;
+```
 
+根据标签查询节点，例如查询所有标签包含 `DOG` 的节点：：
 
+```cypher
+MATCH(n: DOG)
+RETURN n;
+```
 
+我们在上面提到过关系的创建，现在我们可以通过 `MATCH` 和 `CREATE` 查询节点并创建关系了：
 
+```cypher
+MATCH(n:CAT) , (m:PLANTFROM)
+CREATE (n) -[:WORK_FOR]-> (m)
+RETURN n, m;
+```
 
+使用上述语句创建关系时，必须**注意查询结果集的大小**，若存在多个符合条件的节点，则会对结果集中所有的节点创建对应关系。
 
+查询所有与某节点有关系的节点：
+
+```cypher
+MATCH (n:CAT {name: "Hiiro"})--(m)
+RETURN n, m;
+```
+
+根据关系查询，例如查询关系为 `WORK_FOR` 的节点：
+
+```cypher
+MATCH (n)--(WORK_FOR)
+RETURN n;
+```
+
+`--` 并没有指定方向，如需指定使用 `-->` 或 `<--`：
+
+```cypher
+MATCH (n)-->(WORK_FOR)
+RETURN n;
+```
+
+```cypher
+MATCH (n)<--(WORK_FOR)
+RETURN n;
+```
+
+查询两个节点的关系：
+
+```cypher
+MATCH(n:DOG {name:"打工人"}) -[r]-> (m:DOG {name: "老板"})
+RETURN type(r);
+```
 
 ****
 
