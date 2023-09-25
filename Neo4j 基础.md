@@ -265,15 +265,34 @@ CREATE (n:DOG {name: "LYS"}) -[:IN_FAN] -> (i:CAT {name: "Hiiro"}) -[:WORK_FOR]-
 
 ****
 
+`RETURN` 语句可以返回 `Cypher` 的执行结果。
 
+比如，我们创建完节点后直接返回：
 
+```cypher
+CREATE (n:DOG {name: "LYS", age: "14"}) RETURN n;
+```
 
+执行后直接返回了结果：
 
+![image-20230925094006836](https://image.itbaima.net/images/40/image-20230925099619410.png)
 
+也可以返回我们创建好的关系：
 
+```cypher
+CREATE (n:DOG {name: "LYS", age: "14"}) -[:IN_FAN]-> (m:CAT {name: "Hiiro", age: "17"}) RETURN n, m;
+```
 
+![image-20230925094116510](https://image.itbaima.net/images/40/image-20230925097821415.png)
 
+也可以给返回的结果取别名：
 
+```cypher
+CREATE (n:DOG {name: "LYS", age: "14"})
+RETURN n.name AS LYS_NAME;
+```
+
+![image-20230925094342285](https://image.itbaima.net/images/40/image-2023092509889864.png)
 
 ****
 
