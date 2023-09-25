@@ -259,6 +259,8 @@ CREATE (n:DOG {name: "LYS", age: "14"}) -[r:IN_FAN {action: "watch live any time
 CREATE (n:DOG {name: "LYS"}) -[:IN_FAN] -> (i:CAT {name: "Hiiro"}) -[:WORK_FOR]-> (m:MOUSE {name: "ChenRay"});
 ```
 
+**注意**：在 `Cypher` 中，节点之间的关系在创建后不能修改，想要修改只能删除原有关系再重新创建新的关系。
+
 ****
 
 ## RETURN
@@ -464,25 +466,74 @@ SKIP 2 LIMIT 2;
 
 ****
 
-## SET
+## SET & REMOVE
 
 ****
 
+使用 `SET` 和 `REMOVE` 对节点进行标签、属性的更新。
 
+更新节点的属性和标签，例如将标签为 `DOG` 且年龄小于 $60$ 节点的标签更改为 `BOSS` 且年龄增加 $10$：
 
+```cypher
+MATCH(n:DOG)
+WHERE n.age <= 60
+SET n:BOSS
+SET n.age = n.age + 10
+RETURN n;
+```
 
+添加多个标签：
 
+```cypher
+MATCH(n:DOG)
+WHERE n.name = "LYS"
+SET n:DOG:JOKER:STUDENT
+RETURN n;
+```
 
+添加新的属性：
 
+```cypher
+MATCH(n:DOG)
+WHERE n.name = "LYS"
+SET n.school = "HAUE"
+RETURN n;
+```
 
+一次性添加多个属性：
 
+```cypher
+MATCH(n:DOG)
+WHERE n.name = "LYS"
+SET n += {status: "Learning", money: 0, emo: "🤡"}
+RETURN n;
+```
 
+移除某个属性或标签：
+
+```cypher
+MATCH(n:DOG)
+WHERE n.name = "LYS"
+REMOVE n.emo, n:JOKER
+RETURN n;
+```
+
+移除多个属性或标签：
+
+```cypher
+MATCH(n:DOG)
+WHERE n.name = "LYS"
+REMOVE n.status, n.money, n:BOSS:STUDENT
+RETURN n;
+```
 
 ****
 
 ## DELETE
 
 ****
+
+删除某个节点：
 
 
 
