@@ -297,8 +297,8 @@ RETURN n.name AS LYS_NAME;
 首先我们导入一些数据用于后面的示例：
 
 ```cypher
-CREATE(n:DOG {name: "LYS", age: "14"}) -[:LOVER]-> (:BIRD {name: "Astesia", age: "13"}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: "17"}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: "114"}) -[:LOVER]-> (:DOG {name: "LexBurner", age: "514"}), (c) -[:FAN_OF]-> (m), (n) -[:WORK_FOR]-> (p:PLANTFROM {name: "BILIBILI"}) -[:HAVE]-> (:DOG {name: "UPs", age: "ULT"}), (p) -[:BELONGS_to]-> (c);
-CREATE(:WORKER:DOG {name: "打工人", age: "60"}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: "20"});
+CREATE(n:DOG {name: "LYS", age: 14}) -[:LOVER]-> (:BIRD {name: "Astesia", age: 13}) -[:FRIEND]-> (m:CAT {name: "Hiiro", age: 17}), (n) -[:FAN_OF]-> (m), (c:MOUSE {name: "ChenRay", age: 114}) -[:LOVER]-> (:DOG {name: "LexBurner", age: 514}), (c) -[:FAN_OF]-> (m), (n) -[:WORK_FOR]-> (p:PLANTFROM {name: "BILIBILI"}) -[:HAVE]-> (:DOG {name: "UPs", age: 1919}), (p) -[:BELONGS_to]-> (c);
+CREATE(:WORKER:DOG {name: "打工人", age: 60}) -[:WORK_FOR]-> (:BOSS:DOG {name: "老板", age: 20});
 ```
 
 ****
@@ -376,7 +376,7 @@ RETURN type(r);
 
 由于一个节点可能存在多个关系，如果想要查询一条关系路径，未免包含太多的可行路径，因此需要在指定的深度内进行查询，这个查询的过程类似于迭代加深搜索的过程。
 
-在图数据库中进行关系深度查询时，可以使用 `*` 运算符来指定关系的深度。以下是关系深度查询的语法：
+在图数据库中进行关系深度查询时，可以使用 `*` 运算符来指定关系的深度：
 
 ```cypher
 MATCH (startNode)-[*<minDepth>..<maxDepth>]-(endNode)
@@ -393,13 +393,15 @@ RETURN startNode, endNode;
 例如，查询从某个节点出发，关系深度为 $1 \sim 2$ 的节点：
 
 ```cypher
-MATCH (n:CAT {name:"Hiiro"}) -[*1..2]->(m) RETURN *;
+MATCH (n:CAT {name:"Hiiro"}) -[*1..2]->(m)
+RETURN *;
 ```
 
 也可以写成：
 
 ```cypher
-MATCH (n:CAT {name:"Hiiro"}) -[*..2]->(m) RETURN *;
+MATCH (n:CAT {name:"Hiiro"}) -[*..2]->(m)
+RETURN *;
 ```
 
 查询两个节点之间的所有路径，指定深度最大为 $4$ ：
@@ -424,13 +426,41 @@ RETURN path;
 
 ****
 
+使用 `SKIP` 和 `LIMIT` 子句来指定要跳过的结果数量和要返回的结果数量：
 
+```cypher
+MATCH (nodes)
+RETURN nodes
+SKIP <skipCount>
+LIMIT <pageSize>;
+```
 
+其中：
+- `(nodes)` 是节点模式或关系模式，用于指定要返回的节点或关系。
+- `SKIP <skipCount>` 是用于指定要跳过的结果数量的子句。`<skipCount>` 是要跳过的结果数量。
+- `LIMIT <pageSize>` 是用于指定要返回的结果数量的子句。`<pageSize>` 是要返回的结果数量。
 
+通过适当设置 `<skipCount>` 和 `<pageSize>` 的值，可以实现分页查询。
 
+例如分页查询标签为 `DOG` 的节点信息，按照年龄从小到大排序，每页 $2$ 条数据：
 
+获取第 $1$ 页：
 
+```cypher
+MATCH (n:DOG) 
+RETURN n 
+ORDER BY n.age ASC
+SKIP 0 LIMIT 2;
+```
 
+获取第 $2$ 页：
+
+```cypher
+MATCH (n:DOG) 
+RETURN n
+ORDER BY n.age ASC
+SKIP 2 LIMIT 2;
+```
 
 ****
 
